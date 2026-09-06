@@ -1,3 +1,5 @@
+import Footer from "./components/layout/Footer";
+import Header from "./components/layout/Header";
 import "./globals.css";
 
 export default function RootLayout({ children }) {
@@ -5,7 +7,11 @@ export default function RootLayout({ children }) {
     <html
       lang="fa" dir="rtl"
     >
-      <body className="">{children}</body>
+      <body className="bg-white font-IRANSansXV" cz-shortcut-listen="true">
+        <Header />
+        <main>{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }
