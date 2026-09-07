@@ -1,8 +1,26 @@
-import { Book, SearchNormal1, ShoppingBag, User } from "iconsax-react";
+"use client"
+import {
+  ArrowLeft2,
+  Book,
+  BookSquare,
+  SearchNormal1,
+  ShoppingBag,
+  User,
+} from "iconsax-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import MegaMenu from "./MegaMenu";
 
 export default function Header() {
+  const menus = [
+    { id: 1, title: "فروشگاه", url: "/shop" },
+    { id: 2, title: "وبلاگ", url: "/blog" },
+    { id: 3, title: "تماس با ما", url: "/contact-us" },
+    { id: 4, title: "درباره ما", url: "/about-us" },
+  ];
+
+  const [isMegaOpen, setIsMegaOpen] = useState(false);
+
   return (
     <header className="container py-4.5 flex flex-col gap-6">
       {/* Top Header */}
@@ -33,10 +51,14 @@ export default function Header() {
               </svg>
             </span>
           </Link>
-          <form className="shrink-0 relative w-full" action="">
-            <input type="text" placeholder="کتاب ، نویسنده یا موضوع رو بنویس " className="w-full placeholder:text-Gray-100 text-Gray-900 outline-0 p-3 border border-Gray-40 rounded-lg"/>
+          <form className="w-lg relative" action="">
+            <input
+              type="text"
+              placeholder="کتاب ، نویسنده یا موضوع رو بنویس "
+              className="w-full placeholder:text-Gray-100 text-Gray-900 outline-0 p-3 border border-Gray-40 rounded-lg"
+            />
             <span className="absolute left-3 top-1/2 -translate-y-1/2">
-              <SearchNormal1 size={24} color="#B0B0B0" variant="Outline"/>
+              <SearchNormal1 size={24} color="#B0B0B0" variant="Outline" />
             </span>
           </form>
         </div>
@@ -44,25 +66,51 @@ export default function Header() {
           {/* My Library */}
           <button className="flex items-center gap-2 p-3 font-medium text-Primary-700 border-2 border-Gray-40 rounded-lg cursor-pointer">
             کتابخانه من
-            <Book variant="Outline" size={20} color="#744d7e"/>
+            <Book variant="Outline" size={20} color="#744d7e" />
           </button>
           {/* Cart */}
           <Link href={"/cart"}>
-            <button className="flex items-center justify-center p-2 border-2 border-Gray-40 rounded-lg">
-              <ShoppingBag variant="Outline" size={32} color="#744d7e"/>
+            <button className="flex items-center justify-center relative p-2 border-2 border-Gray-40 rounded-lg cursor-pointer">
+              <ShoppingBag variant="Outline" size={32} color="#744d7e" />
+              <span className="absolute -top-1 -left-2 w-4 h-4 flex items-center justify-center text-xs text-white bg-Error-500 rounded-full">
+                0
+              </span>
             </button>
           </Link>
           {/* Login / Register Btn */}
           <Link href={"/login"}>
             <button className="flex items-center justify-center gap-2 font-medium p-3 text-white bg-Primary-700 hover:bg-Primary-600 transition rounded-lg cursor-pointer">
-              <User variant="Outline" size={20} color="#fff"/>
+              <User variant="Outline" size={20} color="#fff" />
               ورود/ثبت نام
             </button>
           </Link>
         </div>
       </div>
       {/* Bottom Header */}
-      <div></div>
+      <div className="flex items-center justify-between relative">
+        <nav>
+          <ul className="flex items-center gap-4 *:text-Gray-900 *:font-semibold *:text-lg">
+            {/* Mega Menu */}
+            <li
+              className="flex items-center justify-center gap-2 pl-3 border-l border-l-Gray-30 cursor-pointer"
+              onMouseEnter={() => setIsMegaOpen(true)}
+            >
+              <BookSquare size={20} color="#787878" variant="Outline" />
+              دسته بندی ها
+            </li>
+            {menus.map((menu) => (
+              <li key={menu.id}>
+                <Link href={menu.url}>{menu.title}</Link>
+              </li>
+            ))}
+          </ul>
+          <MegaMenu isMegaOpen={isMegaOpen} setIsMegaOpen={setIsMegaOpen} />
+        </nav>
+        <button className="flex items-center justify-center gap-2 p-3 pl-0 font-normal text-Primary-700 cursor-pointer">
+          دانلود اپلیکیشن
+          <ArrowLeft2 size={20} color="#744D7E" variant="Outline" />
+        </button>
+      </div>
     </header>
   );
 }

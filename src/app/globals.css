@@ -13,6 +13,12 @@
         margin: 0 auto !important;
     }
 
+    .ss02 {
+        -moz-font-feature-settings: "ss02";
+        -webkit-font-feature-settings: "ss02";
+        font-feature-settings: "ss02";
+    }
+
     [data-sonner-toast][data-type="success"] svg {
         color: #22c55e;
         width: 24px;
