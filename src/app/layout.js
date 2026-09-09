@@ -7,7 +7,7 @@ export default function RootLayout({ children }) {
     <html
       lang="fa" dir="rtl"
     >
-      <body className="bg-white ss02 font-IRANSansXV" cz-shortcut-listen="true">
+      <body className="bg-[#F5F6F8] ss02 font-IRANSansXV" cz-shortcut-listen="true">
         <Header />
         <main>{children}</main>
         <Footer />

@@ -1,7 +1,10 @@
-import Image from "next/image";
-
+import Categories from "@/components/templates/Home/Categories";
+import SwiperBanner from "@/components/templates/Home/SwiperBanner";
 export default function Home() {
   return (
-    <div className="text-4xl font-bold text-red-500">Home</div>
+    <>
+      <SwiperBanner />
+      <Categories />
+    </>
   );
 }
