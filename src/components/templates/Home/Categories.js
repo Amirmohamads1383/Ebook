@@ -38,7 +38,7 @@ export default function Categories() {
 
     return (
         <section className="container pb-14">
-            <div className="flex items-center justify-start md:justify-center gap-4 overflow-x-auto pb-2">
+            <div className="flex items-center justify-start lg:justify-center gap-4 overflow-x-auto">
                 {categories.map((category) => (
                     <Link
                         key={category.id}
@@ -46,7 +46,7 @@ export default function Categories() {
                         className="flex flex-col md:flex-row min-w-fit items-center gap-5 rounded-lg border-2 border-dashed border-Gray-50 bg-white px-2 md:px-5 py-3 transition-all hover:border-Primary-500 hover:shadow-sm"
                     >
                         <Image src={category.icon} alt={category.title} width={36} height={36} className="w-6 h-6 md:w-8 md:h-8" />
-                        <span className="whitespace-nowrap text-xl font-bold text-Gray-950">
+                        <span className="whitespace-nowrap text-lg md:text-xl font-bold text-Gray-950">
                             {category.title}
                         </span>
                     </Link>

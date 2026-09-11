@@ -25,7 +25,8 @@
         height: 24px;
     }
 
-    .navigation-bar-shadow {
+    .navigation-bar-shadow,
+    .product-image-shadow {
         box-shadow: -4px 4px 8px 0 rgba(0, 0, 0, 25%);
     }
 }
