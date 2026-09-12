@@ -8,7 +8,7 @@ import Image from "next/image";
 
 export default function SwiperBanner() {
   return (
-    <section className="pb-14">
+    <section className="pb-10 md:pb-14">
       <Swiper
         modules={[Autoplay]}
         slidesPerView={1}

@@ -37,7 +37,7 @@ export default function Categories() {
     ];
 
     return (
-        <section className="container pb-14">
+        <section className="container pb-10 md:pb-14">
             <div className="flex items-center justify-start lg:justify-center gap-4 overflow-x-auto">
                 {categories.map((category) => (
                     <Link
