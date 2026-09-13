@@ -4,9 +4,109 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "iconsax-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const { push } = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    /* Validation */
+    if (!isLogin) {
+      if (!formData.name.trim()) {
+        toast.error("لطفاً نام و نام خانوادگی را وارد کنید");
+        return;
+      }
+
+      if (!formData.email.trim()) {
+        toast.error("لطفاً ایمیل خود را وارد کنید");
+        return;
+      }
+
+      if (!formData.email.includes("@gmail.com")) {
+        toast.error("لطفاً ایمیل صحیح وارد کنید");
+        return;
+      }
+
+      if (!formData.mobile.trim()) {
+        toast.error("لطفاً شماره موبایل خود را وارد کنید");
+        return;
+      }
+
+      if (!formData.password.trim()) {
+        toast.error("لطفاً رمز عبور خود را وارد کنید");
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        toast.error("رمز عبور باید حداقل ۶ کاراکتر باشد");
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            mobile: formData.mobile,
+            password: formData.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        /* API Error */
+        if (!response.ok) {
+          toast.error(data.message || "ثبت نام انجام نشد");
+          return;
+        }
+
+        /* Success */
+        toast.success(data.message || "ثبت نام با موفقیت انجام شد");
+
+        /* Reset Form */
+        setFormData({
+          name: "",
+          email: "",
+          mobile: "",
+          password: "",
+        });
+
+        /* Go To Dashboard */
+        push("/dashboard");
+      } catch (error) {
+        console.error("Register Error:", error);
+
+        toast.error("ارتباط با سرور برقرار نشد");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   return (
     <section className="min-h-screen flex items-center justify-center py-4">
@@ -14,6 +114,7 @@ export default function LoginPage() {
         <div className="max-w-5xl mx-auto bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
           <div className="grid grid-cols-1 md:grid-cols-2 min-h-120">
             {/* Form Section */}
+
             <div className="flex items-center justify-start p-6 sm:p-10 lg:p-12">
               <div className="w-full max-w-md">
                 <Link
@@ -35,7 +136,8 @@ export default function LoginPage() {
                   </p>
                 </div>
                 {/* Form */}
-                <form className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Name */}
                   {!isLogin && (
                     <div>
                       <label className="block text-sm font-medium text-Gray-200 mb-2">
@@ -43,31 +145,60 @@ export default function LoginPage() {
                       </label>
                       <input
                         type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
                         placeholder="نام و نام خانوادگی"
                         className="w-full h-12 px-4 rounded-xl border border-Gray-20 outline-none text-Gray-900 placeholder:text-Gray-100 focus:border-Primary transition"
                       />
                     </div>
                   )}
+                  {/* Email */}
+                  {!isLogin && (
+                    <div>
+                      <label className="block text-sm font-medium text-Gray-200 mb-2">
+                        ایمیل
+                      </label>
+                      <input
+                        type="text"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="example@gmail.com"
+                        className="w-full h-12 px-4 rounded-xl border border-Gray-20 outline-none text-Gray-900 placeholder:text-Gray-100 focus:border-Primary transition"
+                      />
+                    </div>
+                  )}
+                  {/* Mobile */}
                   <div>
                     <label className="block text-sm font-medium text-Gray-200 mb-2">
                       شماره موبایل
                     </label>
                     <input
                       type="tel"
+                      name="mobile"
+                      maxLength={11}
+                      value={formData.mobile}
+                      onChange={handleChange}
                       placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷"
                       className="rtl w-full h-12 px-4 rounded-xl border border-Gray-20 outline-none text-Gray-900 placeholder:text-Gray-100 focus:border-Primary transition"
                     />
                   </div>
+                  {/* Password */}
                   <div>
                     <label className="block text-sm font-medium text-Gray-200 mb-2">
                       رمز عبور
                     </label>
                     <input
                       type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
                       placeholder="رمز عبور خود را وارد کنید"
                       className="rtl w-full h-12 px-4 rounded-xl border border-Gray-20 outline-none text-Gray-900 placeholder:text-Gray-100 focus:border-Primary transition"
                     />
                   </div>
+                  {/* Login Options */}
                   {isLogin && (
                     <div className="flex items-center justify-between text-sm">
                       <label
@@ -79,10 +210,7 @@ export default function LoginPage() {
                           type="checkbox"
                           className="peer hidden"
                         />
-                        <div
-                          htmlFor="hr"
-                          className="h-5 w-5 flex rounded-md border border-Gray-50 peer-checked:bg-Primary-700 transition"
-                        >
+                        <div className="h-5 w-5 flex rounded-md border border-Gray-50 peer-checked:bg-Primary-700 transition">
                           <svg
                             fill="none"
                             viewBox="0 0 24 24"
@@ -93,12 +221,12 @@ export default function LoginPage() {
                               d="M4 12.6111L8.92308 17.5L20 6.5"
                               strokeWidth="2"
                               strokeLinecap="round"
-                              strokeLinecap="round"
-                            ></path>
+                            />
                           </svg>
                         </div>
                         مرا به خاطر بسپار
                       </label>
+
                       <button
                         type="button"
                         className="text-Primary hover:underline cursor-pointer"
@@ -110,9 +238,10 @@ export default function LoginPage() {
                   {/* Submit */}
                   <button
                     type="submit"
-                    className="w-full h-12 rounded-xl bg-Primary-700 cursor-pointer text-white font-bold hover:opacity-90 transition"
+                    disabled={loading}
+                    className="w-full h-12 rounded-xl bg-Primary-700 cursor-pointer text-white font-bold hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {isLogin ? "ورود" : "ثبت نام"}
+                    {loading ? "در حال ارسال..." : isLogin ? "ورود" : "ثبت نام"}
                   </button>
                 </form>
                 {/* Switch Login / Register */}
@@ -122,9 +251,12 @@ export default function LoginPage() {
                       ? "حساب کاربری ندارید؟"
                       : "قبلاً حساب کاربری ساخته‌اید؟"}
                   </span>
+
                   <button
                     type="button"
-                    onClick={() => setIsLogin(!isLogin)}
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                    }}
                     className="mr-2 text-Primary font-bold hover:underline cursor-pointer"
                   >
                     {isLogin ? "ثبت نام کنید" : "وارد شوید"}
@@ -132,12 +264,16 @@ export default function LoginPage() {
                 </div>
               </div>
             </div>
+
             {/* Banner Section */}
+
             <div className="hidden md:flex relative bg-Primary items-center justify-center p-8 overflow-hidden">
               <div className="absolute w-72 h-72 rounded-full bg-white/10 -top-20 -right-20" />
+
               <div className="absolute w-56 h-56 rounded-full bg-white/10 -bottom-20 -left-20" />
+
               <Image
-                src={"/images/login/library.webp"}
+                src="/images/login/library.webp"
                 alt="login page"
                 className="rounded-lg"
                 width={1000}
