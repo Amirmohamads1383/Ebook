@@ -1,21 +1,21 @@
 import { NextResponse } from "next/server";
 
 import bcrypt from "bcryptjs";
-import connectToDb from "@/lib/db";
+import connectToDB from "@/lib/db";
 import User from "@/model/user";
 import { createToken } from "@/lib/auth";
 
 export async function POST(req) {
     try {
-        await connectToDb();
+        await connectToDB();
 
-        const { name, email, mobile, password } = await req.json();
+        const { mobile, password } = await req.json();
 
         // Validation
-        if (!name || !email || !mobile || !password) {
+        if (!mobile?.trim() || !password) {
             return NextResponse.json(
                 {
-                    message: "لطفاً تمام فیلدها را پر کنید",
+                    message: "لطفاً شماره موبایل و رمز عبور را وارد کنید",
                 },
                 {
                     status: 400,
@@ -23,54 +23,48 @@ export async function POST(req) {
             );
         }
 
-        /* Check Correct Password */
-        if (password.length < 6) {
+        /* Find User */
+        const user = await User.findOne({
+            mobile: mobile.trim(),
+        });
+
+        /* Dont Exist User */
+        if (!user) {
             return NextResponse.json(
                 {
-                    message: "رمز عبور باید حداقل ۶ کاراکتر باشد",
+                    message: "شماره موبایل یا رمز عبور اشتباه است",
                 },
                 {
-                    status: 400,
+                    status: 401,
                 }
             );
         }
 
-        /* Have User */
-        const existingUser = await User.findOne({
-            mobile: mobile.trim(),
-        });
+        /* Check Password */
+        const isPasswordCorrect = await bcrypt.compare(
+            password,
+            user.password
+        );
 
-        if (existingUser) {
+        /* Incorect Password */
+        if (!isPasswordCorrect) {
             return NextResponse.json(
                 {
-                    message: "این شماره موبایل قبلاً ثبت نام کرده است",
+                    message: "شماره موبایل یا رمز عبور اشتباه است",
                 },
                 {
-                    status: 409,
+                    status: 401,
                 }
             );
         }
-
-        // Hash Password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create User
-        const user = await User.create({
-            name: name.trim(),
-            mobile: mobile.trim(),
-            email: email.trim(),
-            password: hashedPassword,
-            role: "User",
-        });
 
         /* Create Token */
         const token = await createToken(user);
 
-        // Create Response
+        /* Response */
         const response = NextResponse.json(
             {
-                message: "ثبت نام با موفقیت انجام شد",
-
+                message: "ورود با موفقیت انجام شد",
                 user: {
                     id: user._id,
                     name: user.name,
@@ -80,11 +74,11 @@ export async function POST(req) {
                 },
             },
             {
-                status: 201,
+                status: 200,
             }
         );
 
-        /* Save Token HTTP ONLY */
+        /* Save Token */
         response.cookies.set({
             name: "token",
             value: token,
@@ -97,11 +91,11 @@ export async function POST(req) {
 
         return response;
     } catch (error) {
-        console.error("Register Error:", error);
+        console.error("Login Error:", error);
 
         return NextResponse.json(
             {
-                message: "خطایی در ثبت نام رخ داد",
+                message: "خطایی در ورود به حساب کاربری رخ داد",
             },
             {
                 status: 500,

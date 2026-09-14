@@ -1,5 +1,6 @@
 "use client";
 import {
+  ArrowDown2,
   ArrowLeft2,
   Book,
   BookSquare,
@@ -8,9 +9,10 @@ import {
   User,
 } from "iconsax-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MegaMenu from "./MegaMenu";
 import MiniCart from "./MiniCart";
+import UserDropDown from "../Header/UserDropDown";
 
 export default function Header() {
   const menus = [
@@ -22,11 +24,41 @@ export default function Header() {
 
   const [isMegaOpen, setIsMegaOpen] = useState(false);
   const [IsShowMiniCart, setIsShowMiniCart] = useState(false);
+  const [isShowUserDropDown, setIsShowUserDropDown] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  /* Check User Is Login */
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+
+        if (!response.ok) {
+          setUser(null);
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.authenticated) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Auth Check Error:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <header className="container py-4 md:py-5 flex flex-col gap-4 md:gap-6">
-
-      {/* ================= Top Header ================= */}
+      {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Logo + Search */}
         <div className="flex items-center gap-4 md:gap-8 flex-1">
@@ -65,21 +97,16 @@ export default function Header() {
               className="w-full placeholder:text-Gray-100 text-Gray-900 outline-0 p-3 border border-Gray-40 rounded-lg"
             />
             <span className="absolute left-3 top-1/2 -translate-y-1/2">
-              <SearchNormal1
-                size={24}
-                color="#B0B0B0"
-                variant="Outline"
-              />
+              <SearchNormal1 size={24} color="#B0B0B0" variant="Outline" />
             </span>
           </form>
         </div>
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* My Library */}
-          <button
-            className="hidden lg:flex items-center justify-center gap-2 p-3 font-medium text-Primary-700 border-2 border-Gray-40 rounded-lg cursor-pointer">
+          <button className="hidden lg:flex items-center justify-center gap-2 p-3 font-medium text-Primary-700 border-2 border-Gray-40 rounded-lg cursor-pointer">
             کتابخانه من
-            <Book variant="Outline" size={20} color="#744d7e"/>
+            <Book variant="Outline" size={20} color="#744d7e" />
           </button>
           {/* Cart */}
           <div
@@ -89,23 +116,52 @@ export default function Header() {
           >
             <Link
               href="/cart"
-              className="flex items-center justify-center relative p-2 border-2 border-Gray-40 rounded-lg">
-              <ShoppingBag variant="Outline" size={28} color="#744d7e"
-              />
-              <span
-                className="absolute -top-1 -left-2 w-4 h-4 flex items-center justify-center text-[10px] text-white bg-Error-500 rounded-full">
+              className="flex items-center justify-center relative p-2.5 border-2 border-Gray-40 rounded-lg"
+            >
+              <ShoppingBag variant="Outline" size={28} color="#744d7e" />
+              <span className="absolute -top-1 -left-2 w-4 h-4 flex items-center justify-center text-[10px] text-white bg-Error-500 rounded-full">
                 0
               </span>
             </Link>
-            <MiniCart IsShowMiniCart={IsShowMiniCart} setIsShowMiniCart={setIsShowMiniCart}/>
+            <MiniCart
+              IsShowMiniCart={IsShowMiniCart}
+              setIsShowMiniCart={setIsShowMiniCart}
+            />
           </div>
-          {/* Login */}
-          <Link
-            href="/login"
-            className="hidden lg:flex items-center justify-center gap-2 font-medium p-3 text-white bg-Primary-700 hover:bg-Primary-600 transition rounded-lg">
-            <User variant="Outline" size={20} color="#fff" />
-            ورود/ثبت نام
-          </Link>
+          {/* Login & Account */}
+          {!loading && (
+            <>
+              {!user ? (
+                <Link
+                  href="/login"
+                  className="hidden lg:flex items-center justify-center gap-2 font-medium p-3 text-white bg-Primary-700 hover:bg-Primary-600 transition rounded-lg"
+                >
+                  <User variant="Outline" size={20} color="#fff" />
+                  ورود/ثبت نام
+                </Link>
+              ) : (
+                <>
+                  <div
+                    className="relative"
+                    onMouseEnter={() => setIsShowUserDropDown(true)}
+                    onMouseLeave={() => setIsShowUserDropDown(false)}
+                  >
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center gap-2 px-3.5 py-3 border-2 border-Gray-40 rounded-lg"
+                    >
+                      <User size={24} variant="Outline" color="#744D7E" />
+                      <ArrowDown2 size={24} variant="Outline" color="#744D7E" />
+                    </Link>
+                    <UserDropDown
+                      isShowUserDropDown={isShowUserDropDown}
+                      setIsShowUserDropDown={setIsShowUserDropDown}
+                    />
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
       {/* Search */}
@@ -133,24 +189,16 @@ export default function Header() {
             </li>
             {menus.map((menu) => (
               <li key={menu.id}>
-                <Link href={menu.url}>
-                  {menu.title}
-                </Link>
+                <Link href={menu.url}>{menu.title}</Link>
               </li>
             ))}
           </ul>
           <MegaMenu isMegaOpen={isMegaOpen} setIsMegaOpen={setIsMegaOpen} />
         </nav>
         {/* Download App */}
-        <button
-          className="flex items-center justify-center gap-2 p-3 pl-0 font-normal text-Primary-700 cursor-pointer"
-        >
+        <button className="flex items-center justify-center gap-2 p-3 pl-0 font-normal text-Primary-700 cursor-pointer">
           دانلود اپلیکیشن
-          <ArrowLeft2
-            size={20}
-            color="#744D7E"
-            variant="Outline"
-          />
+          <ArrowLeft2 size={20} color="#744D7E" variant="Outline" />
         </button>
       </div>
     </header>

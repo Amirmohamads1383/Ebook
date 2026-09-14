@@ -30,7 +30,8 @@
     }
 
     .navigation-bar-shadow,
-    .product-image-shadow {
+    .product-image-shadow,
+    .user-drop-down {
         box-shadow: -4px 4px 8px 0 rgba(0, 0, 0, 25%);
     }
 }

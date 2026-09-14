@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "iconsax-react";
 import { toast } from "sonner";
+import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -29,7 +30,9 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     /* Validation */
+
     if (!isLogin) {
       if (!formData.name.trim()) {
         toast.error("لطفاً نام و نام خانوادگی را وارد کنید");
@@ -41,70 +44,139 @@ export default function LoginPage() {
         return;
       }
 
-      if (!formData.email.includes("@gmail.com")) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(formData.email)) {
         toast.error("لطفاً ایمیل صحیح وارد کنید");
         return;
       }
+    }
 
-      if (!formData.mobile.trim()) {
-        toast.error("لطفاً شماره موبایل خود را وارد کنید");
-        return;
-      }
+    if (!formData.mobile.trim()) {
+      toast.error("لطفاً شماره موبایل خود را وارد کنید");
+      return;
+    }
 
-      if (!formData.password.trim()) {
-        toast.error("لطفاً رمز عبور خود را وارد کنید");
-        return;
-      }
+    if (!formData.password.trim()) {
+      toast.error("لطفاً رمز عبور خود را وارد کنید");
+      return;
+    }
 
-      if (formData.password.length < 6) {
-        toast.error("رمز عبور باید حداقل ۶ کاراکتر باشد");
-        return;
-      }
+    if (formData.password.length < 6) {
+      toast.error("رمز عبور باید حداقل ۶ کاراکتر باشد");
+      return;
+    }
 
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
 
-        const response = await fetch("/api/auth/register", {
+      /* Login */
+      if (isLogin) {
+        const response = await fetch("/api/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            mobile: formData.mobile,
+            mobile: formData.mobile.trim(),
             password: formData.password,
           }),
         });
 
         const data = await response.json();
 
-        /* API Error */
+        // Login Error
         if (!response.ok) {
-          toast.error(data.message || "ثبت نام انجام نشد");
+          await Swal.fire({
+            icon: "error",
+            title: "ورود ناموفق",
+            text: data.message || "شماره موبایل یا رمز عبور اشتباه است",
+            confirmButtonText: "متوجه شدم",
+            confirmButtonColor: "#4357BE",
+          });
+
           return;
         }
 
-        /* Success */
-        toast.success(data.message || "ثبت نام با موفقیت انجام شد");
-
-        /* Reset Form */
-        setFormData({
-          name: "",
-          email: "",
-          mobile: "",
-          password: "",
+        // Login Success
+        const result = await Swal.fire({
+          icon: "success",
+          title: "ورود موفق",
+          text: data.message || "با موفقیت وارد حساب کاربری شدید",
+          confirmButtonText: "رفتن به داشبورد",
+          confirmButtonColor: "#4357BE",
+          allowOutsideClick: false,
         });
 
-        /* Go To Dashboard */
-        push("/dashboard");
-      } catch (error) {
-        console.error("Register Error:", error);
+        // Go To Dashboard
+        if (result.isConfirmed) {
+          push("/");
+        }
 
-        toast.error("ارتباط با سرور برقرار نشد");
-      } finally {
-        setLoading(false);
+        return;
       }
+
+      /* Register */
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim().toLowerCase(),
+          mobile: formData.mobile.trim(),
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      // Register Error
+      if (!response.ok) {
+        await Swal.fire({
+          icon: "error",
+          title: "ثبت نام ناموفق",
+          text: data.message || "ثبت نام انجام نشد",
+          confirmButtonText: "متوجه شدم",
+          confirmButtonColor: "#4357BE",
+        });
+
+        return;
+      }
+
+      // Register Success
+      const result = await Swal.fire({
+        icon: "success",
+        title: "ثبت نام موفق",
+        text: data.message || "حساب کاربری شما با موفقیت ایجاد شد",
+        confirmButtonText: "رفتن به داشبورد",
+        confirmButtonColor: "#4357BE",
+        allowOutsideClick: false,
+      });
+
+      // Reset Form
+      setFormData({
+        name: "",
+        email: "",
+        mobile: "",
+        password: "",
+      });
+
+      // Go To Dashboard
+      if (result.isConfirmed) {
+        push("/dashboard");
+      }
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "خطا",
+        text: "ارتباط با سرور برقرار نشد",
+        confirmButtonText: "متوجه شدم",
+        confirmButtonColor: "#4357BE",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -114,7 +186,6 @@ export default function LoginPage() {
         <div className="max-w-5xl mx-auto bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
           <div className="grid grid-cols-1 md:grid-cols-2 min-h-120">
             {/* Form Section */}
-
             <div className="flex items-center justify-start p-6 sm:p-10 lg:p-12">
               <div className="w-full max-w-md">
                 <Link
@@ -143,6 +214,7 @@ export default function LoginPage() {
                       <label className="block text-sm font-medium text-Gray-200 mb-2">
                         نام و نام خانوادگی
                       </label>
+
                       <input
                         type="text"
                         name="name"
@@ -153,12 +225,14 @@ export default function LoginPage() {
                       />
                     </div>
                   )}
+
                   {/* Email */}
                   {!isLogin && (
                     <div>
                       <label className="block text-sm font-medium text-Gray-200 mb-2">
                         ایمیل
                       </label>
+
                       <input
                         type="text"
                         name="email"
@@ -169,11 +243,13 @@ export default function LoginPage() {
                       />
                     </div>
                   )}
+
                   {/* Mobile */}
                   <div>
                     <label className="block text-sm font-medium text-Gray-200 mb-2">
                       شماره موبایل
                     </label>
+
                     <input
                       type="tel"
                       name="mobile"
@@ -184,11 +260,13 @@ export default function LoginPage() {
                       className="rtl w-full h-12 px-4 rounded-xl border border-Gray-20 outline-none text-Gray-900 placeholder:text-Gray-100 focus:border-Primary transition"
                     />
                   </div>
+
                   {/* Password */}
                   <div>
                     <label className="block text-sm font-medium text-Gray-200 mb-2">
                       رمز عبور
                     </label>
+
                     <input
                       type="password"
                       name="password"
@@ -198,6 +276,7 @@ export default function LoginPage() {
                       className="rtl w-full h-12 px-4 rounded-xl border border-Gray-20 outline-none text-Gray-900 placeholder:text-Gray-100 focus:border-Primary transition"
                     />
                   </div>
+
                   {/* Login Options */}
                   {isLogin && (
                     <div className="flex items-center justify-between text-sm">
@@ -235,6 +314,7 @@ export default function LoginPage() {
                       </button>
                     </div>
                   )}
+
                   {/* Submit */}
                   <button
                     type="submit"
@@ -251,11 +331,16 @@ export default function LoginPage() {
                       ? "حساب کاربری ندارید؟"
                       : "قبلاً حساب کاربری ساخته‌اید؟"}
                   </span>
-
                   <button
                     type="button"
                     onClick={() => {
                       setIsLogin(!isLogin);
+                      setFormData({
+                        name: "",
+                        email: "",
+                        mobile: "",
+                        password: "",
+                      });
                     }}
                     className="mr-2 text-Primary font-bold hover:underline cursor-pointer"
                   >
@@ -264,14 +349,10 @@ export default function LoginPage() {
                 </div>
               </div>
             </div>
-
             {/* Banner Section */}
-
             <div className="hidden md:flex relative bg-Primary items-center justify-center p-8 overflow-hidden">
               <div className="absolute w-72 h-72 rounded-full bg-white/10 -top-20 -right-20" />
-
               <div className="absolute w-56 h-56 rounded-full bg-white/10 -bottom-20 -left-20" />
-
               <Image
                 src="/images/login/library.webp"
                 alt="login page"
