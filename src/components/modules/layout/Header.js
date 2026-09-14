@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import MegaMenu from "./MegaMenu";
 import MiniCart from "./MiniCart";
 import UserDropDown from "../Header/UserDropDown";
+import Swal from "sweetalert2";
 
 export default function Header() {
   const menus = [
@@ -55,6 +56,55 @@ export default function Header() {
     };
     checkAuth();
   }, []);
+
+  /* Logout Handler */
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "خروج از حساب کاربری",
+      text: "آیا مطمئن هستید که می‌خواهید خارج شوید؟",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "بله، خارج شو",
+      cancelButtonText: "انصراف",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+
+      setUser(null);
+
+      await Swal.fire({
+        title: "خارج شدید",
+        text: "با موفقیت از حساب کاربری خارج شدید",
+        icon: "success",
+        confirmButtonText: "باشه",
+      });
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout Error:", error);
+
+      Swal.fire({
+        title: "خطا",
+        text: "خروج از حساب کاربری انجام نشد",
+        icon: "error",
+        confirmButtonText: "باشه",
+      });
+    }
+  };
 
   return (
     <header className="container py-4 md:py-5 flex flex-col gap-4 md:gap-6">
@@ -156,6 +206,7 @@ export default function Header() {
                     <UserDropDown
                       isShowUserDropDown={isShowUserDropDown}
                       setIsShowUserDropDown={setIsShowUserDropDown}
+                      handleLogout={handleLogout}
                     />
                   </div>
                 </>
