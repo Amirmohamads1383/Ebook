@@ -6,7 +6,7 @@ import NavigationBar from "./NavigationBar";
 export default function Footer() {
   return (
     <>
-      <footer className="bg-Primary-950">
+      <footer className="bg-Primary-950 mt-8 md:mt-12 lg:mt-16">
         <div className="container flex flex-col gap-6 py-8">
           <TopFooter />
           <BottomFooter />
