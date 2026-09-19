@@ -1,13 +1,24 @@
-import { Archive, Star1 } from "iconsax-react";
+"use client";
+import { Archive, ArrowCircleDown2, ArrowCircleUp2, Star1 } from "iconsax-react";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 
-export default function ProductInfo() {
+export default function ProductInfo({ product }) {
+  const [readMore, setReadMore] = useState(false);
+
+  const addToCart = async () => {
+    toast.success("محصول به سبد خرید اضافه شد")
+  }
+
+  const addToMyLibrary = () => {
+    toast.success("محصول به کتابخانه من اضافه شد")
+  }
   return (
     <div className="w-full lg:w-2/3 flex flex-col gap-6">
       <div className="flex items-center gap-8 p-6 bg-white rounded-lg">
         <Image
-          src={"/images/Book image.png"}
+          src={product.image}
           alt="test"
           width={274}
           className="rounded-lg"
@@ -18,7 +29,7 @@ export default function ProductInfo() {
             {/* Title */}
             <div className="flex items-center justify-between pb-4 border-b border-b-Gray-30">
               <h2 className="text-xl font-semibold text-Gray-950">
-                وقتی نیچه گریست
+                {product.name}
               </h2>
               <span className="flex items-center gap-1.5 text-sm lg:text-base text-Gray-950">
                 <Star1 variant="Bold" color="#E1BD09" size={20} />
@@ -30,45 +41,70 @@ export default function ProductInfo() {
               <ul className="flex flex-col gap-3 items-start">
                 <li className="flex items-center gap-1 font-medium">
                   <span className="text-Gray-300">نویسنده:</span>
-                  <span className="text-Gray-950">اروین د. یالوم</span>
+                  <span className="text-Gray-950">{product.author}</span>
                 </li>
                 <li className="flex items-center gap-1 font-medium">
                   <span className="text-Gray-300">مترجم :</span>
-                  <span className="text-Gray-950">سپیده حبیب</span>
+                  <span className="text-Gray-950">{product.translator}</span>
                 </li>
                 <li className="flex items-center gap-1 font-medium">
                   <span className="text-Gray-300">تعداد صفحات :</span>
-                  <span className="text-Gray-950">۹۳۵</span>
+                  <span className="text-Gray-950">{product.pages}</span>
                 </li>
                 <li className="flex items-center gap-1 font-medium">
                   <span className="text-Gray-300">سال انتشار :</span>
-                  <span className="text-Gray-950"> ۱۳۹۸</span>
+                  <span className="text-Gray-950">{product.publishYear}</span>
                 </li>
               </ul>
-              <span className="absolute top-0 left-0 p-2 border-2 border-Gray-30 rounded-md cursor-pointer">
+              <span className="absolute top-0 left-0 p-2 border-2 border-Gray-30 rounded-md cursor-pointer" onClick={addToMyLibrary}>
                 <Archive size={20} color="#8A8A8A" variant="Bold" />
               </span>
             </div>
             {/* Price */}
             <div className="flex flex-col items-end justify-end gap-2 pt-4 border-t border-t-Gray-30">
               <div className="flex items-center gap-2">
-                <span className="text-Gray-200 line-through">118,000</span>
+                <span className="text-Gray-200 line-through">{product.price.toLocaleString()}</span>
                 <span className="w-12 h-6 text-sm font-bold flex items-center justify-center rounded-full bg-Error-600 text-white">
-                  ٪۳۰
+                  {Math.round(
+                    ((product.price - product.discountPrice) / product.price) * 100
+                  ) + "%"}
                 </span>
               </div>
               <p className="text-lg font-bold flex items-center gap-1 text-Gray-950">
-                82,600
+                {product.discountPrice.toLocaleString()}
                 <span className="text-Gray-300 text-sm">تومان</span>
               </p>
             </div>
           </div>
-          <button className="text-center py-4 bg-Primary-700 hover:bg-Primary-900 text-white rounded-lg cursor-pointer transition">
+          <button className="text-center py-4 bg-Primary-700 hover:bg-Primary-900 text-white rounded-lg cursor-pointer transition" onClick={addToCart}>
             افزودن به سبد خرید
           </button>
         </div>
       </div>
-      <div className="p-6 bg-white rounded-lg"></div>
+      <div className="p-6 bg-white rounded-lg">
+        <span className="font-semibold text-Gray-950">درباره کتاب:</span>
+        <p
+          className={`text-sm/relaxed font-medium my-3 text-Gray-950 ${readMore ? "line-clamp-none" : "line-clamp-3"}`}
+        >
+          {product.description}
+        </p>
+        <button
+          className="flex items-center gap-1.5 text-Primary-700 cursor-pointer"
+          onClick={() => setReadMore(!readMore)}
+        >
+          {!readMore ? (
+            <>
+              <span>مشاهده بیشتر</span>
+              <ArrowCircleDown2 variant="Outline" size={20} color="#744D7E" />
+            </>
+          ) : (
+            <>
+              <span>مشاهده کمتر</span>
+              <ArrowCircleUp2 variant="Outline" size={20} color="#744D7E" />
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
