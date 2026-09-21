@@ -21,8 +21,14 @@
 
     [data-sonner-toast][data-type="success"] svg {
         color: #22c55e;
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
+    }
+
+    [data-sonner-toast][data-type="error"] svg {
+        color: #ec0b1a;
+        width: 20px;
+        height: 20px;
     }
 
     .rtl {

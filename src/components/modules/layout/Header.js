@@ -155,10 +155,12 @@ export default function Header() {
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* My Library */}
-            <button className="hidden lg:flex items-center justify-center gap-2 p-3 font-medium text-Primary-700 border-2 border-Gray-40 rounded-lg cursor-pointer">
-              کتابخانه من
-              <Book variant="Outline" size={20} color="#744d7e" />
-            </button>
+            <Link href={"/my-library"}>
+              <button className="hidden lg:flex items-center justify-center gap-2 p-3 font-medium text-Primary-700 border-2 border-Gray-40 rounded-lg cursor-pointer">
+                کتابخانه من
+                <Book variant="Outline" size={20} color="#744d7e" />
+              </button>
+            </Link>
             {/* Cart */}
             <div
               className="relative"

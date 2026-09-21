@@ -56,8 +56,25 @@ export default function ProductInfo({ product }) {
   };
 
   const addToMyLibrary = () => {
-    toast.success("محصول به کتابخانه من اضافه شد");
+    const library = JSON.parse(localStorage.getItem("my_library")) || [];
+
+    const isExist = library.some((item) => item._id === product._id);
+
+    if (isExist) {
+      const updatedLibrary = library.filter((item) => item._id !== product._id);
+
+      localStorage.setItem("my_library", JSON.stringify(updatedLibrary));
+
+      toast.error("محصول از کتابخانه شما حذف شد");
+    } else {
+      const updatedLibrary = [...library, product];
+
+      localStorage.setItem("my_library", JSON.stringify(updatedLibrary));
+
+      toast.success("محصول به کتابخانه شما اضافه شد");
+    }
   };
+
   return (
     <div className="w-full lg:w-2/3 flex flex-col gap-6">
       <div className="flex items-center gap-8 p-6 bg-white rounded-lg">
