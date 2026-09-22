@@ -30,9 +30,13 @@ export default function ProductInfo({ product }) {
       } else {
         const cartItem = {
           id: product._id,
+          image: product.image,
           name: product.name,
           price: product.price,
+          discountPrice: product.discountPrice,
           count,
+          author: product.author,
+          translator: product.translator,
         };
 
         cart.push(cartItem);
@@ -43,9 +47,13 @@ export default function ProductInfo({ product }) {
     } else {
       const cartItem = {
         id: product._id,
+        image: product.image,
         name: product.name,
         price: product.price,
+        discountPrice: product.discountPrice,
         count,
+        author: product.author,
+        translator: product.translator,
       };
 
       cart.push(cartItem);
