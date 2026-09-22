@@ -1,4 +1,5 @@
 "use client";
+
 import {
   ArrowDown2,
   ArrowLeft2,
@@ -28,8 +29,31 @@ export default function Header() {
   const [isShowUserDropDown, setIsShowUserDropDown] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cartCount, setCartCount] = useState(0);
 
-  /* Check User Is Login */
+  const updateCartCount = () => {
+    const savedCart = localStorage.getItem("cart");
+
+    if (!savedCart) {
+      setCartCount(0);
+      return;
+    }
+
+    try {
+      const cart = JSON.parse(savedCart);
+
+      const count = cart.reduce(
+        (total, item) => total + Number(item.count || 1),
+        0,
+      );
+
+      setCartCount(count);
+    } catch (error) {
+      console.error("Cart Parse Error:", error);
+      setCartCount(0);
+    }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -54,10 +78,24 @@ export default function Header() {
         setLoading(false);
       }
     };
+
     checkAuth();
   }, []);
 
-  /* Logout Handler */
+  useEffect(() => {
+    updateCartCount();
+
+    const handleCartUpdate = () => {
+      updateCartCount();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
+  }, []);
+
   const handleLogout = async () => {
     const result = await Swal.fire({
       title: "خروج از حساب کاربری",
@@ -129,7 +167,7 @@ export default function Header() {
                     <path
                       fillRule="evenodd"
                       clipRule="evenodd"
-                      d="M63.202 13.972c3.542.018 6.557 1.106 9.452 2.59.347.18.694.742.7 1.125.037 3.925.035 7.85.032 11.897l-.002 3.375c-.217-.07-.415-.136-.603-.198a33 33 0 0 0-.988-.316l-1.985-.585h-.001c-1.902-.56-3.805-1.12-5.696-1.718-.359-.114-.861-.58-.867-.886-.049-4.098-.046-8.197-.043-12.369zm11.396 19.071-.001-3.182c-.002-4.15-.004-8.142.025-12.138 0-.33.227-.814.496-.97 2.973-1.663 6.108-2.776 9.775-2.764v2.19q0 1.564-.002 3.127c-.003 3.125-.007 6.249.02 9.376.006.945-.257 1.328-1.268 1.568-1.828.436-3.627 1-5.425 1.563q-.921.29-1.844.572c-.31.095-.61.212-.974.353-.235.091-.496.193-.802.305m-12.605-2.225V16.544c-1.501.891-2.022 1.872-1.986 3.344q.137 5.889-.006 11.767c-.03 1.328.485 1.61 1.67 1.801 2.482.4 4.994.844 7.375 1.627 1.562.515 2.483.096 3.817-1.268a10634 10634 0 0 0-10.87-2.997m13.479 3.248a29.3 29.3 0 0 1 9.165-2.698c1.238-.15 1.55-.586 1.531-1.759a563 563 0 0 1-.029-9.247q.005-1.779.005-3.59c1.233.616 1.86 1.333 1.843 2.661a396 396 0 0 0 .012 12.228c.024 1.197-.359 1.58-1.543 1.771-2.537.407-5.103.856-7.538 1.651-1.52.503-2.417.126-3.446-1.017m-3.123 1.962c1.603-1.441 1.663-1.441 3.392 0z"
+                      d="M63.202 13.972c3.542.018 6.557 1.106 9.452 2.59.347.18.694.742.7 1.125.037 3.925.035 7.85.032 11.897l-.002 3.375c-.217-.07-.415-.136-.603-.198a33 33 0 0 0-.988-.316l-1.985-.585h-.001c-1.902-.56-3.805-1.12-5.696-1.718-.359-.114-.861-.58-.867-.886-.049-4.098-.046-8.197-.043-12.369zm11.396 19.071-.001-3.182c-.002-4.15-.004-8.142.025-12.138 0-.33.227-.814.496-.97 2.973-1.663 6.108-2.776 9.775-2.764v2.19q0 1.564-.002 3.127c-.003 3.125-.007 6.249-.002 9.376.006.945-.257 1.328-1.268 1.568-1.828.436-3.627 1-5.425 1.563q-.921.29-1.844.572c-.31.095-.61.212-.974.353-.235.091-.496.193-.802.305m-12.605-2.225V16.544c-1.501.891-2.022 1.872-1.986 3.344q.137 5.889-.006 11.767c-.03 1.328.485 1.61 1.67 1.801 2.482.4 4.994.844 7.375 1.627 1.562.515 2.483.096 3.817-1.268a10634 10634 0 0 0-10.87-2.997m13.479 3.248a29.3 29.3 0 0 1 9.165-2.698c1.238-.15 1.55-.586 1.531-1.759a563 563 0 0 1-.029-9.247q.005-1.779.005-3.59c1.233.616 1.86 1.333 1.843 2.661a396 396 0 0 0 .012 12.228c.024 1.197-.359 1.58-1.543 1.771-2.537.407-5.103.856-7.538 1.651-1.52.503-2.417.126-3.446-1.017m-3.123 1.962c1.603-1.441 1.663-1.441 3.392 0z"
                     />
                   </g>
                   <defs>
@@ -155,7 +193,7 @@ export default function Header() {
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* My Library */}
-            <Link href={"/my-library"}>
+            <Link href="/my-library">
               <button className="hidden lg:flex items-center justify-center gap-2 p-3 font-medium text-Primary-700 border-2 border-Gray-40 rounded-lg cursor-pointer">
                 کتابخانه من
                 <Book variant="Outline" size={20} color="#744d7e" />
@@ -172,9 +210,11 @@ export default function Header() {
                 className="flex items-center justify-center relative p-2.5 border-2 border-Gray-40 rounded-lg"
               >
                 <ShoppingBag variant="Outline" size={28} color="#744d7e" />
-                <span className="absolute -top-1 -left-2 w-4 h-4 flex items-center justify-center text-[10px] text-white bg-Error-500 rounded-full">
-                  0
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -left-2 min-w-4 h-4 px-1 flex items-center justify-center text-[10px] text-white bg-Error-500 rounded-full">
+                    {cartCount.toLocaleString("fa-IR")}
+                  </span>
+                )}
               </Link>
               <MiniCart
                 IsShowMiniCart={IsShowMiniCart}
@@ -193,30 +233,24 @@ export default function Header() {
                     ورود/ثبت نام
                   </Link>
                 ) : (
-                  <>
-                    <div
-                      className="relative"
-                      onMouseEnter={() => setIsShowUserDropDown(true)}
-                      onMouseLeave={() => setIsShowUserDropDown(false)}
+                  <div
+                    className="relative"
+                    onMouseEnter={() => setIsShowUserDropDown(true)}
+                    onMouseLeave={() => setIsShowUserDropDown(false)}
+                  >
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center gap-2 px-3.5 py-3 border-2 border-Gray-40 rounded-lg"
                     >
-                      <Link
-                        href="/dashboard"
-                        className="flex items-center gap-2 px-3.5 py-3 border-2 border-Gray-40 rounded-lg"
-                      >
-                        <User size={24} variant="Outline" color="#744D7E" />
-                        <ArrowDown2
-                          size={24}
-                          variant="Outline"
-                          color="#744D7E"
-                        />
-                      </Link>
-                      <UserDropDown
-                        isShowUserDropDown={isShowUserDropDown}
-                        setIsShowUserDropDown={setIsShowUserDropDown}
-                        handleLogout={handleLogout}
-                      />
-                    </div>
-                  </>
+                      <User size={24} variant="Outline" color="#744D7E" />
+                      <ArrowDown2 size={24} variant="Outline" color="#744D7E" />
+                    </Link>
+                    <UserDropDown
+                      isShowUserDropDown={isShowUserDropDown}
+                      setIsShowUserDropDown={setIsShowUserDropDown}
+                      handleLogout={handleLogout}
+                    />
+                  </div>
                 )}
               </>
             )}
@@ -237,7 +271,6 @@ export default function Header() {
         <div className="hidden lg:flex items-center justify-between relative">
           <nav>
             <ul className="flex items-center gap-4 *:text-Gray-900 *:font-semibold *:text-lg">
-              {/* Mega Menu */}
               <li
                 className="flex items-center justify-center gap-2 pl-3 border-l border-l-Gray-30 cursor-pointer"
                 onMouseEnter={() => setIsMegaOpen(true)}

@@ -16,37 +16,14 @@ export default function ProductInfo({ product }) {
   const addToCart = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    if (cart.length) {
-      const isInCart = cart.some((item) => item.id === product._id);
+    const existingProduct = cart.find((item) => item.id === product._id);
 
-      if (isInCart) {
-        cart.forEach((item) => {
-          if (item.id === product._id) {
-            item.count = item.count + count;
-          }
-        });
-        localStorage.setItem("cart", JSON.stringify(cart));
-        toast.success("محصول با موفقیت به سبد خرید اضافه شد");
-      } else {
-        const cartItem = {
-          id: product._id,
-          image: product.image,
-          name: product.name,
-          price: product.price,
-          discountPrice: product.discountPrice,
-          count,
-          author: product.author,
-          translator: product.translator,
-        };
-
-        cart.push(cartItem);
-
-        localStorage.setItem("cart", JSON.stringify(cart));
-        toast.success("محصول با موفقیت به سبد خرید اضافه شد");
-      }
+    if (existingProduct) {
+      existingProduct.count += count;
     } else {
-      const cartItem = {
+      cart.push({
         id: product._id,
+        slug: product.slug,
         image: product.image,
         name: product.name,
         price: product.price,
@@ -54,13 +31,15 @@ export default function ProductInfo({ product }) {
         count,
         author: product.author,
         translator: product.translator,
-      };
-
-      cart.push(cartItem);
-
-      localStorage.setItem("cart", JSON.stringify(cart));
-      toast.success("محصول با موفقیت به سبد خرید اضافه شد");
+      });
     }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    // اطلاع دادن به MiniCart و Header
+    window.dispatchEvent(new Event("cartUpdated"));
+
+    toast.success("محصول با موفقیت به سبد خرید اضافه شد");
   };
 
   const addToMyLibrary = () => {
@@ -141,7 +120,7 @@ export default function ProductInfo({ product }) {
                 <span className="w-12 h-6 text-sm font-bold flex items-center justify-center rounded-full bg-Error-600 text-white">
                   {Math.round(
                     ((product.price - product.discountPrice) / product.price) *
-                      100,
+                    100,
                   ) + "%"}
                 </span>
               </div>

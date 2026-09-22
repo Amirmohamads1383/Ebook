@@ -47,12 +47,15 @@ export default function Page() {
 
     if (result.isConfirmed) {
       const newCart = cart.filter(
-        (item) => item._id !== productId && item.id !== productId,
+        (item) => item._id !== productId && item.id !== productId
       );
 
       setCart(newCart);
 
       localStorage.setItem(CART_KEY, JSON.stringify(newCart));
+
+      // اطلاع دادن به MiniCart و Header
+      window.dispatchEvent(new Event("cartUpdated"));
 
       Swal.fire({
         title: "حذف شد",
